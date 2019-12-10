@@ -1,4 +1,4 @@
-package system
+package gostp
 
 import (
 	"encoding/json"

@@ -1,4 +1,4 @@
-package system
+package gostp
 
 type regexAndDescription struct {
 	regex       string
