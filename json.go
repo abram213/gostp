@@ -95,7 +95,7 @@ func deepInspection(model interface{}, parendJSON string, deletions *[]string, r
 	}
 }
 
-// FillModelSafely - eee2
+// FillModelSafely - easily fills given model by json from request
 func FillModelSafely(r *http.Request, model interface{}, modelToFill interface{}, handlerType string, godMode bool) string {
 	errors := ""
 	var deletions []string                 // deletions pathes
@@ -109,7 +109,6 @@ func FillModelSafely(r *http.Request, model interface{}, modelToFill interface{}
 		fmt.Println(ok)
 	}
 	deepInspection(model, "", &deletions, regexTagsMap, functionsTagsMap, handlerType, direction, godMode)
-	fmt.Println("******", deletions)
 	stringData := string(data)
 	// Checking for regex error
 	for k, v := range regexTagsMap {
@@ -133,13 +132,12 @@ func FillModelSafely(r *http.Request, model interface{}, modelToFill interface{}
 	for _, deletion := range deletions {
 		stringData, _ = sjson.Delete(stringData, deletion)
 	}
-	fmt.Println(stringData)
 	_ = json.Unmarshal([]byte(stringData), &modelToFill)
 
 	return errors
 }
 
-// EncodeModelSafely - encodes given model by security rules
+// EncodeModelSafely - encodes given model by security rules to json
 func EncodeModelSafely(model interface{}, modelToFill interface{}) []byte {
 	byteJSON, _ := json.Marshal(modelToFill)
 	encodedJSON := string(byteJSON)

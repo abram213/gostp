@@ -5,7 +5,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/buger/jsonparser"
+	"github.com/tidwall/gjson"
 )
 
 // Login handles login attempts
@@ -18,8 +18,8 @@ func Login(w http.ResponseWriter, r *http.Request) *AppError {
 		return &AppError{Err, Err.Error(), 405}
 	}
 
-	email, _ := jsonparser.GetString(data, "email")
-	password, _ := jsonparser.GetString(data, "password")
+	email := gjson.Get(string(data), "email").Str
+	password := gjson.Get(string(data), "password").Str
 
 	if Db.Where("email = ?", email).First(&user).RecordNotFound() {
 		return &AppError{Err, errors.New(`{"error": "Wrong email or password"}`).Error(), 405}
@@ -41,7 +41,7 @@ func RefreshTokens(w http.ResponseWriter, r *http.Request) *AppError {
 		return &AppError{Err, Err.Error(), 401}
 	}
 
-	refreshToken, err := jsonparser.GetString(data, "refresh_token")
+	refreshToken := gjson.Get(string(data), "refresh_token").Str
 	token, err := JWTParse(refreshToken)
 	if err != nil {
 		return &AppError{err, err.Error(), 401}
