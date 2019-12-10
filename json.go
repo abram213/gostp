@@ -38,7 +38,7 @@ func checkSecurity(tagsString string, handlerType, direction string, godMode boo
 	return false
 }
 
-func deepInspection(model interface{}, parendJSON string, deletions []string, regexTagsMap, functionsTagsMap map[string]string, handlerType, direction string, godMode bool) {
+func deepInspection(model interface{}, parendJSON string, deletions *[]string, regexTagsMap, functionsTagsMap map[string]string, handlerType, direction string, godMode bool) {
 	values := reflect.ValueOf(model)
 	fields := reflect.TypeOf(model)
 	num := fields.NumField()
@@ -67,7 +67,7 @@ func deepInspection(model interface{}, parendJSON string, deletions []string, re
 				deepInspection(values.Field(i).Interface(), parendJSON+childJSON, deletions, regexTagsMap, functionsTagsMap, handlerType, direction, godMode)
 			} else {
 				path := parendJSON + childJSON
-				deletions = append(deletions, path[1:len(path)])
+				*deletions = append(*deletions, path[1:len(path)])
 			}
 		} else {
 			if jsonTag != nil && jsonTag.Name != "-" {
@@ -75,7 +75,7 @@ func deepInspection(model interface{}, parendJSON string, deletions []string, re
 					deleted := checkSecurity(securityTag.Name, handlerType, direction, godMode)
 					if deleted {
 						path := parendJSON + childJSON
-						deletions = append(deletions, path[1:len(path)])
+						*deletions = append(*deletions, path[1:len(path)])
 					}
 				}
 
@@ -108,7 +108,8 @@ func FillModelSafely(r *http.Request, model interface{}, modelToFill interface{}
 	if !ok {
 		fmt.Println(ok)
 	}
-	deepInspection(model, "", deletions, regexTagsMap, functionsTagsMap, handlerType, direction, godMode)
+	deepInspection(model, "", &deletions, regexTagsMap, functionsTagsMap, handlerType, direction, godMode)
+	fmt.Println("******", deletions)
 	stringData := string(data)
 	// Checking for regex error
 	for k, v := range regexTagsMap {
@@ -147,7 +148,7 @@ func EncodeModelSafely(model interface{}, modelToFill interface{}) []byte {
 	var functionsTagsMap map[string]string // map of functions
 	regexTagsMap = make(map[string]string)
 	functionsTagsMap = make(map[string]string)
-	deepInspection(model, "", deletions, regexTagsMap, functionsTagsMap, "", "out", false)
+	deepInspection(model, "", &deletions, regexTagsMap, functionsTagsMap, "", "out", false)
 	for _, deletion := range deletions {
 		encodedJSON, _ = sjson.Delete(encodedJSON, deletion)
 	}
