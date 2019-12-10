@@ -111,22 +111,26 @@ func FillModelSafely(r *http.Request, model interface{}, modelToFill interface{}
 	deepInspection(model, "", &deletions, regexTagsMap, functionsTagsMap, handlerType, direction, godMode)
 	stringData := string(data)
 	// Checking for regex error
-	for k, v := range regexTagsMap {
-		value := gjson.Get(stringData, k)
-		var re = regexp.MustCompile(regexMap[v].regex)
-		if !re.MatchString(value.Str) {
-			errors = errors + "; " + regexMap[v].description
+	if RegexMap != nil {
+		for k, v := range regexTagsMap {
+			value := gjson.Get(stringData, k)
+			var re = regexp.MustCompile(RegexMap[v].Regex)
+			if !re.MatchString(value.Str) {
+				errors = errors + "; " + RegexMap[v].Description
+			}
 		}
 	}
 	if errors != "" {
 		return errors[2:len(errors)]
 	}
 	// Check functions
-	for k, v := range functionsTagsMap {
-		value := gjson.Get(stringData, k)
-		valueBefore := value.Str
-		functionsMap[v].(func(*string))(&valueBefore)
-		stringData, _ = sjson.Set(stringData, k, valueBefore)
+	if FunctionsMap != nil {
+		for k, v := range functionsTagsMap {
+			value := gjson.Get(stringData, k)
+			valueBefore := value.Str
+			FunctionsMap[v].(func(*string))(&valueBefore)
+			stringData, _ = sjson.Set(stringData, k, valueBefore)
+		}
 	}
 	// Checking for deletions
 	for _, deletion := range deletions {

@@ -1,26 +1,29 @@
 package gostp
 
-type regexAndDescription struct {
-	regex       string
-	description string
+import (
+	"os"
+	"path/filepath"
+)
+
+// RegexAndDescription struct which contains regexes and description of error
+type RegexAndDescription struct {
+	Regex       string
+	Description string
 }
 
-var functionsMap map[string]interface{}
+// WorkDir - is a directory address where program has been launched
+var WorkDir, _ = filepath.Abs(filepath.Dir(os.Args[0]))
 
-var regexMap map[string]regexAndDescription
+// FunctionsMap - map of functions
+var FunctionsMap map[string]interface{}
+
+// RegexMap - map of regexes
+var RegexMap map[string]RegexAndDescription
 
 // InitRegex - initialize all regexes which needed to precheck values
-func InitRegex() {
-	regexMap = make(map[string]regexAndDescription)
-	// Checks if email address
-	regexMap["email"] = regexAndDescription{"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$", "email isn't valid"}
-	// Checks if valid russian phone
-	regexMap["russianPhone"] = regexAndDescription{`^(\+7|7|8)?[\s\-]?\(?[489][0-9]{2}\)?[\s\-]?[0-9]{3}[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}$`, "phone isn't valid"}
-	// Checks if password is more than 6 symbols
-	regexMap["password"] = regexAndDescription{`^.{6,}$`, "password is less than 6 symbols"}
-
+func InitRegex(functionsMap map[string]interface{}, regexMap map[string]RegexAndDescription) {
 	// Functions Map initialization
-	functionsMap = map[string]interface{}{
-		"hashpwd": HashPassword,
-	}
+	FunctionsMap = functionsMap
+	// Regex Map initialization
+	RegexMap = regexMap
 }

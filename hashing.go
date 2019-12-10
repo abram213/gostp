@@ -1,8 +1,6 @@
 package gostp
 
 import (
-	"fmt"
-
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -14,9 +12,6 @@ func HashPassword(password *string) {
 
 // CheckPasswordHash returns if hash is valid
 func CheckPasswordHash(password, hash string) bool {
-	fmt.Println(password)
-	fmt.Println(hash)
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	fmt.Println(err)
 	return err == nil
 }
