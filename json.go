@@ -96,7 +96,7 @@ func deepInspection(model interface{}, parendJSON string, deletions *[]string, r
 }
 
 // FillModelSafely - easily fills given model by json from request
-func FillModelSafely(r *http.Request, model interface{}, modelToFill interface{}, handlerType string, godMode bool) string {
+func FillModelSafely(r *http.Request, modelToFill interface{}, handlerType string, godMode bool) string {
 	errors := ""
 	var deletions []string                 // deletions pathes
 	var regexTagsMap map[string]string     // map of regex tags
@@ -108,7 +108,9 @@ func FillModelSafely(r *http.Request, model interface{}, modelToFill interface{}
 	if !ok {
 		fmt.Println(ok)
 	}
-	deepInspection(model, "", &deletions, regexTagsMap, functionsTagsMap, handlerType, direction, godMode)
+	model := reflect.ValueOf(modelToFill).Elem()
+	//fmt.Println("Name of struct:", reflect.TypeOf(hmm.Interface()).Name()) // To avoid using deepInspection each time
+	deepInspection(model.Interface(), "", &deletions, regexTagsMap, functionsTagsMap, handlerType, direction, godMode)
 	stringData := string(data)
 	// Checking for regex error
 	if RegexMap != nil {
@@ -142,7 +144,7 @@ func FillModelSafely(r *http.Request, model interface{}, modelToFill interface{}
 }
 
 // EncodeModelSafely - encodes given model by security rules to json
-func EncodeModelSafely(model interface{}, modelToFill interface{}) []byte {
+func EncodeModelSafely(modelToFill interface{}) []byte {
 	byteJSON, _ := json.Marshal(modelToFill)
 	encodedJSON := string(byteJSON)
 	var deletions []string                 // deletions pathes
@@ -150,7 +152,8 @@ func EncodeModelSafely(model interface{}, modelToFill interface{}) []byte {
 	var functionsTagsMap map[string]string // map of functions
 	regexTagsMap = make(map[string]string)
 	functionsTagsMap = make(map[string]string)
-	deepInspection(model, "", &deletions, regexTagsMap, functionsTagsMap, "", "out", false)
+	model := reflect.ValueOf(modelToFill).Elem()
+	deepInspection(model.Interface(), "", &deletions, regexTagsMap, functionsTagsMap, "", "out", false)
 	for _, deletion := range deletions {
 		encodedJSON, _ = sjson.Delete(encodedJSON, deletion)
 	}
