@@ -13,11 +13,9 @@ type JWT struct {
 	*jwt.Token
 }
 
-var MySigningKey = []byte("u495CqrE*ZY!zR%8Wv7oIvvjUg")
-
 var JwtMiddleware = jwtmiddleware.New(jwtmiddleware.Options{
 	ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
-		return MySigningKey, nil
+		return []byte(Settings.SigningKey), nil
 	},
 	SigningMethod: jwt.SigningMethodHS256,
 	ErrorHandler:  CustomJWTError,
@@ -28,7 +26,7 @@ func JWTParse(t string) (JWT, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
-		return MySigningKey, nil
+		return []byte(Settings.SigningKey), nil
 	})
 
 	if err != nil {
@@ -76,7 +74,7 @@ func GenerateToken(userId uint, expiresIn int64) string {
 	claims["expires_in"] = expiresIn
 	token.Claims = claims
 
-	tokenString, _ := token.SignedString(MySigningKey)
+	tokenString, _ := token.SignedString([]byte(Settings.SigningKey))
 
 	return tokenString
 }
@@ -100,7 +98,7 @@ func GetUserIDClaim(tokenString string) (float64, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
-		return MySigningKey, nil
+		return []byte(Settings.SigningKey), nil
 	})
 
 	if err != nil {

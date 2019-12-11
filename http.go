@@ -33,13 +33,13 @@ func FileServer(r chi.Router, path string, root http.FileSystem) {
 	path += "*"
 
 	r.Get(path, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Server", "Go-Server")
+		w.Header().Set("Server", "Gostp")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Accept, Accept-Language, Content-Language, Content-Type, x-xsrf-token, authorization")
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		if _, err := os.Stat(fmt.Sprintf("%s", root) + r.RequestURI); os.IsNotExist(err) {
-			http.ServeFile(w, r, filepath.Join(WorkDir, "dist/index.html"))
+			http.ServeFile(w, r, filepath.Join(Settings.WorkDir, "dist/index.html"))
 		} else {
 			fs.ServeHTTP(w, r)
 		}
@@ -48,18 +48,17 @@ func FileServer(r chi.Router, path string, root http.FileSystem) {
 
 // CommonHeader sets header to all of handlers
 func CommonHeader(w http.ResponseWriter) {
-	w.Header().Set("Server", "Go-Server")
+	w.Header().Set("Server", "Gostp")
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS")
 	w.Header().Set("Access-Control-Allow-Headers", "Accept, Accept-Language, Content-Language, Content-Type, x-xsrf-token, authorization")
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
-	//w.WriteHeader(200)
 }
 
 // SendOptions to client
 func SendOptions(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Server", "Go-Server")
+	w.Header().Set("Server", "Gostp")
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS")
@@ -105,7 +104,7 @@ func GetImageFromRequest(r *http.Request, formName string) (string, error) {
 	serverFileNameHash := hex.EncodeToString(h.Sum(nil))
 	fileName := serverFileNameHash + filepath.Ext(header.Filename)
 
-	f, err := os.OpenFile(filepath.Join(WorkDir, "dist/images/"+fileName), os.O_WRONLY|os.O_CREATE, 0777)
+	f, err := os.OpenFile(filepath.Join(Settings.WorkDir, "dist/images/"+fileName), os.O_WRONLY|os.O_CREATE, 0777)
 	if err != nil {
 		return "", err
 	}
