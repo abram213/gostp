@@ -5,9 +5,13 @@ import (
 )
 
 // HashPassword returns hashed and salted password
-func HashPassword(password *string) {
-	bytes, _ := bcrypt.GenerateFromPassword([]byte(*password), bcrypt.MinCost)
-	*password = string(bytes)
+func HashPassword(password *string, functionError *string) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(*password), bcrypt.MinCost)
+	if err != nil {
+		*functionError = err.Error()
+	} else {
+		*password = string(bytes)
+	}
 }
 
 // CheckPasswordHash returns if hash is valid

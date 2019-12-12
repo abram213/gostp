@@ -129,9 +129,16 @@ func Fill(r *http.Request, modelToFill interface{}, handlerType string, godMode 
 		for k, v := range functionsTagsMap {
 			value := gjson.Get(stringData, k)
 			valueBefore := value.Str
-			FunctionsMap[v].(func(*string))(&valueBefore)
+			functionError := ""
+			FunctionsMap[v].(func(*string, *string))(&valueBefore, &functionError)
 			stringData, _ = sjson.Set(stringData, k, valueBefore)
+			if functionError != "" {
+				errors = errors + "; " + functionError
+			}
 		}
+	}
+	if errors != "" {
+		return errors[2:len(errors)]
 	}
 	// Checking for deletions
 	for _, deletion := range deletions {
