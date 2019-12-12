@@ -27,12 +27,12 @@ var RegexMap = make(map[string]RegexAndDescription)
 
 // RegexAndDescription struct which contains regexes and description of error
 type RegexAndDescription struct {
-	Regex       string `yaml:"regex"`       // Regex - regular expression rule to validate string
-	Description string `yaml:"description"` // Description - description why string is not valid
+	Regex       string // Regex - regular expression rule to validate string
+	Description string // Description - description why string is not valid
 }
 
-// Gostp - structure for gostp settings
-type Gostp struct {
+// Settings - structure for gostp settings
+var Settings = struct {
 	WorkDir     string `yaml:"work_dir"`     // WorkDir - is a directory address where program has been launched (default - directory where program stored)
 	SigningKey  string `yaml:"signing_key"`  // SigningKey - key for signing JWT (default - "")
 	SQLtype     string `yaml:"sql_type"`     // SQLtype - type of gorm SQL (default - "sqlite3")
@@ -43,10 +43,7 @@ type Gostp struct {
 	SQLuser     string `yaml:"sql_user"`     // SQLuser - database username (default - "admin")
 	SQLpassword string `yaml:"sql_password"` // SQLpassword - database password (default - "admin")
 	SQLsslmode  string `yaml:"sql_sslmode"`  // SQLsslmode - database sslmode (default - "disabled")
-}
-
-// Settings - main settings
-var Settings = Gostp{
+}{
 	CurrentFolder(),
 	"",
 	"sqlite3",

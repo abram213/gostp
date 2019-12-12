@@ -85,7 +85,6 @@ func deepInspection(model interface{}, parendJSON string, deletions *[]string, r
 				}
 
 				if functionTag != nil {
-					//fmt.Println("Found function tag: ", functionTag.Name)
 					path := parendJSON + childJSON
 					functionsTagsMap[path[1:len(path)]] = functionTag.Name
 				}
