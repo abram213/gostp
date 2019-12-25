@@ -46,8 +46,8 @@ func FileServer(r chi.Router, path string, root http.FileSystem) {
 	}))
 }
 
-// CommonHeader sets header to all of handlers
-func CommonHeader(w http.ResponseWriter) {
+// OkHeader sets header to all of handlers
+func OkHeader(w http.ResponseWriter) {
 	w.Header().Set("Server", "Gostp")
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")

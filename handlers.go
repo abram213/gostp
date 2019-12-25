@@ -10,7 +10,7 @@ import (
 
 // Login handles login attempts
 func Login(w http.ResponseWriter, r *http.Request) *AppError {
-	CommonHeader(w)
+	OkHeader(w)
 	var user User
 
 	data, ok := r.Context().Value("body").([]byte)
@@ -35,7 +35,7 @@ func Login(w http.ResponseWriter, r *http.Request) *AppError {
 
 // RefreshTokens handles refresh token attempt
 func RefreshTokens(w http.ResponseWriter, r *http.Request) *AppError {
-	CommonHeader(w)
+	OkHeader(w)
 	data, ok := r.Context().Value("body").([]byte)
 	if !ok {
 		return &AppError{Err, Err.Error(), 401}

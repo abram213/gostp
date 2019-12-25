@@ -9,10 +9,12 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
+// JWT token struct
 type JWT struct {
 	*jwt.Token
 }
 
+// JwtMiddleware - middleware which validates token
 var JwtMiddleware = jwtmiddleware.New(jwtmiddleware.Options{
 	ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
 		return []byte(Settings.SigningKey), nil
@@ -21,6 +23,7 @@ var JwtMiddleware = jwtmiddleware.New(jwtmiddleware.Options{
 	ErrorHandler:  CustomJWTError,
 })
 
+// JWTParse - parses jwt token
 func JWTParse(t string) (JWT, error) {
 	token, err := jwt.Parse(t, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -36,11 +39,12 @@ func JWTParse(t string) (JWT, error) {
 	return JWT{token}, nil
 }
 
+// CustomJWTError - returns error if validation fails
 func CustomJWTError(w http.ResponseWriter, r *http.Request, err string) {
-	CommonHeader(w)
 	http.Error(w, err, http.StatusUnauthorized)
 }
 
+// IsExpired - checks if token is expired
 func (token *JWT) IsExpired() bool {
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
@@ -57,6 +61,7 @@ func (token *JWT) IsExpired() bool {
 	return false
 }
 
+// GetUserID - gets user id from jwt token
 func (token *JWT) GetUserID() (float64, error) {
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
@@ -66,11 +71,12 @@ func (token *JWT) GetUserID() (float64, error) {
 	return claims["user_id"].(float64), nil
 }
 
-func GenerateToken(userId uint, expiresIn int64) string {
+// GenerateToken - generates new token
+func GenerateToken(userID uint, expiresIn int64) string {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := make(jwt.MapClaims)
 
-	claims["user_id"] = userId
+	claims["user_id"] = userID
 	claims["expires_in"] = expiresIn
 	token.Claims = claims
 
@@ -79,6 +85,7 @@ func GenerateToken(userId uint, expiresIn int64) string {
 	return tokenString
 }
 
+// RefreshUserTokens - refreshes user tokens
 func RefreshUserTokens(user User, userTokens *UserTokens) {
 	expiresIn := time.Now().Add(time.Minute * 30).Unix()
 	accessToken := GenerateToken(user.ID, expiresIn)

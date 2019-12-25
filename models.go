@@ -35,3 +35,11 @@ type Token struct {
 	UserID       uint       `json:"-"`
 	RefreshToken string     `gorm:"type:varchar(255)" json:"refresh_token"`
 }
+
+// Access struct contains all access posibilities on site.
+type Access struct {
+	Common
+	UserID uint `json:"user_id" security:"protected"`
+	Admin  bool `json:"-"`
+	User   bool `json:"-"`
+}
