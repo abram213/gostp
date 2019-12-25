@@ -1,9 +1,9 @@
 package gostp
 
 import (
-	"fmt"
 	"net/http"
 	"reflect"
+	"strconv"
 
 	jwtmiddleware "github.com/auth0/go-jwt-middleware"
 )
@@ -15,7 +15,6 @@ func CheckAccess(r *http.Request, accesses []string, accessStruct interface{}) b
 	typeOfAccessStruct := reflect.TypeOf(accessStruct)
 	newInterfaceOfAccessStruct := reflect.New(typeOfAccessStruct).Interface()
 	if Db.Where("user_id = ?", userID).First(newInterfaceOfAccessStruct).RecordNotFound() {
-		fmt.Println("user's access struct not found", userID)
 		return false
 	}
 	accessStructValue := reflect.ValueOf(newInterfaceOfAccessStruct).Elem()
@@ -24,7 +23,6 @@ func CheckAccess(r *http.Request, accesses []string, accessStruct interface{}) b
 		return true
 	}
 	for _, access := range accesses {
-		fmt.Println(access+" value : ", accessStructValue.FieldByName(access).Bool())
 		if !accessStructValue.FieldByName(access).Bool() {
 			return false
 		}
@@ -33,17 +31,27 @@ func CheckAccess(r *http.Request, accesses []string, accessStruct interface{}) b
 }
 
 // CheckBelonging checks if user's some struct belogns to another through several structs.
-func CheckBelonging(r *http.Request, path []string, models ...interface{}) bool {
-	token, _ := jwtmiddleware.FromAuthHeader(r)
-	userID, _ := GetUserIDClaim(token)
-	previousID := uint64(userID)
-	for index, model := range models {
-		typeOfModel := reflect.TypeOf(model)
-		newInterfaceOfModel := reflect.New(typeOfModel).Interface()
-		if Db.Where(path[index]+" = ?", previousID).First(newInterfaceOfModel).RecordNotFound() {
-			fmt.Println("user's access struct not found", userID)
-			return false
+func CheckBelonging(r *http.Request, target string, path []string, models ...interface{}) bool {
+	targetID, err := strconv.ParseUint(target, 10, 64)
+	if err == nil {
+		for index, model := range models {
+			typeOfModel := reflect.TypeOf(model)
+			newInterfaceOfModel := reflect.New(typeOfModel).Interface()
+			if Db.Where("id = ?", targetID).First(newInterfaceOfModel).RecordNotFound() {
+				return false
+			}
+			if index+1 != len(models) {
+				targetID = reflect.ValueOf(newInterfaceOfModel).Elem().FieldByName(path[index]).Uint()
+			} else {
+				targetID = reflect.ValueOf(newInterfaceOfModel).Elem().FieldByName("UserID").Uint()
+			}
+		}
+		token, _ := jwtmiddleware.FromAuthHeader(r)
+		userID, _ := GetUserIDClaim(token)
+		currentUserID := uint64(userID)
+		if currentUserID == targetID {
+			return true
 		}
 	}
-	return true
+	return false
 }
