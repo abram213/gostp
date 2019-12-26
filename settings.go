@@ -3,8 +3,10 @@ package gostp
 import (
 	"io/ioutil"
 	"log"
+	"net/http"
 	"path/filepath"
 
+	"github.com/go-chi/chi"
 	"github.com/jinzhu/gorm"
 	"gopkg.in/yaml.v2"
 
@@ -12,6 +14,9 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
+
+// Models - all app models
+var Models []interface{}
 
 // Db - gorm db
 var Db *gorm.DB
@@ -33,6 +38,7 @@ type RegexAndDescription struct {
 
 // Settings - structure for gostp settings
 var Settings = struct {
+	Port        string `yaml:"port"`
 	WorkDir     string `yaml:"work_dir"`     // WorkDir - is a directory address where program has been launched (default - directory where program stored)
 	SigningKey  string `yaml:"signing_key"`  // SigningKey - key for signing JWT (default - "")
 	SQLtype     string `yaml:"sql_type"`     // SQLtype - type of gorm SQL (default - "sqlite3")
@@ -44,6 +50,7 @@ var Settings = struct {
 	SQLpassword string `yaml:"sql_password"` // SQLpassword - database password (default - "admin")
 	SQLsslmode  string `yaml:"sql_sslmode"`  // SQLsslmode - database sslmode (default - "disabled")
 }{
+	":7777",
 	CurrentFolder(),
 	"",
 	"sqlite3",
@@ -56,11 +63,14 @@ var Settings = struct {
 	"disable"}
 
 // Init - initialize of gostp
-func Init(functionsMap map[string]interface{}, regexMap map[string]RegexAndDescription) {
+func Init(AppRoutes func(r *chi.Mux), functionsMap map[string]interface{}, regexMap map[string]RegexAndDescription, models ...interface{}) {
+	r := chi.NewRouter()
 	// Functions Map initialization
 	FunctionsMap = functionsMap
 	// Regex Map initialization
 	RegexMap = regexMap
+	// Models initialization
+	Models = models
 
 	if FileNotExist(filepath.Join(Settings.WorkDir, "env.yaml")) == nil {
 		file, _ := ioutil.ReadFile(filepath.Join(Settings.WorkDir, "env.yaml"))
@@ -75,4 +85,13 @@ func Init(functionsMap map[string]interface{}, regexMap map[string]RegexAndDescr
 	} else {
 		Db, Err = gorm.Open("postgres", "host="+Settings.SQLhost+" port="+Settings.SQLport+" user="+Settings.SQLuser+" dbname="+Settings.SQLdbname+" password="+Settings.SQLpassword+" sslmode="+Settings.SQLsslmode+"")
 	}
+	// Check arguments from command line
+	СheckArguments(&Settings.Port)
+	// Start static file server
+	filesDir := filepath.Join(Settings.WorkDir, "dist")
+	FileServer(r, "/", http.Dir(filesDir))
+	// Start all app routes
+	AppRoutes(r)
+	// Start http listener
+	http.ListenAndServe(Settings.Port, r)
 }
