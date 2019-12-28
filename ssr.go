@@ -72,7 +72,7 @@ func generatePage(pageURL string) string {
 	navArgs := page.NewNavigateArgs(Settings.SSRhost + pageURL)
 	c.Page.Navigate(ctx, navArgs)
 
-	time.Sleep(time.Millisecond * Settings.SSRMillisecondWait)
+	time.Sleep(time.Millisecond * time.Duration(Settings.SSRMillisecondWait))
 
 	// Wait until we have a DOMContentEventFired event.
 	domContent.Recv()
@@ -88,7 +88,7 @@ func generatePage(pageURL string) string {
 
 	renderedHTML = result.OuterHTML
 
-	CachedPages[pageURL] = CachedPage{HTML: renderedHTML, ExpirationTime: time.Now().Local().Add(time.Second * time.Duration(60))}
+	CachedPages[pageURL] = CachedPage{HTML: renderedHTML, ExpirationTime: time.Now().Local().Add(time.Second * time.Duration(Settings.SSRexpiration))}
 	return renderedHTML
 }
 
