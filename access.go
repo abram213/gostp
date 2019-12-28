@@ -8,7 +8,7 @@ import (
 	jwtmiddleware "github.com/auth0/go-jwt-middleware"
 )
 
-// CheckAccess gets user by him token and checks accesss by struct fieldnames
+// CheckAccess gets user by him token and checks accesses by struct fieldnames
 func CheckAccess(r *http.Request, accesses []string, accessStruct interface{}) bool {
 	token, _ := jwtmiddleware.FromAuthHeader(r)
 	userID, _ := GetUserIDClaim(token)
@@ -54,4 +54,13 @@ func CheckBelonging(r *http.Request, target string, path []string, models ...int
 		}
 	}
 	return false
+}
+
+// CheckCurrentUser - check current user by id from url
+func CheckCurrentUser(r *http.Request, URLUserID string) bool {
+	token, _ := jwtmiddleware.FromAuthHeader(r)
+	userID, _ := GetUserIDClaim(token)
+	currentUserID := uint64(userID)
+	targetID, _ := strconv.ParseUint(URLUserID, 10, 64)
+	return currentUserID == targetID
 }

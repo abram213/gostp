@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/jinzhu/gorm"
@@ -38,21 +39,27 @@ type RegexAndDescription struct {
 
 // Settings - structure for gostp settings
 var Settings = struct {
-	Port        string `yaml:"port"`
-	WorkDir     string `yaml:"work_dir"`     // WorkDir - is a directory address where program has been launched (default - directory where program stored)
-	SigningKey  string `yaml:"signing_key"`  // SigningKey - key for signing JWT (default - "")
-	SQLtype     string `yaml:"sql_type"`     // SQLtype - type of gorm SQL (default - "sqlite3")
-	SQLfilename string `yaml:"sql_filename"` // SQLfilename - filename of sqlite db (default "app.db")
-	SQLhost     string `yaml:"sql_host"`     // SQLhost - host of remote or local db (defatult - "127.0.0.1")
-	SQLport     string `yaml:"sql_port"`     // SQLport - port of remote or local db (default - "5432")
-	SQLdbname   string `yaml:"sql_dbname"`   // SQLdbname - database name of remote or local db (default - "app")
-	SQLuser     string `yaml:"sql_user"`     // SQLuser - database username (default - "admin")
-	SQLpassword string `yaml:"sql_password"` // SQLpassword - database password (default - "admin")
-	SQLsslmode  string `yaml:"sql_sslmode"`  // SQLsslmode - database sslmode (default - "disabled")
+	Port               string        `yaml:"port"`
+	WorkDir            string        `yaml:"work_dir"`    // WorkDir - is a directory address where program has been launched (default - directory where program stored)
+	SigningKey         string        `yaml:"signing_key"` // SigningKey - key for signing JWT (default - "")
+	SSRMillisecondWait time.Duration `yaml:"ssr_wait"`
+	SSRhost            string        `yaml:"ssr_host"`
+	SSRdevtools        string        `yaml:"ssr_devtools"`
+	SQLtype            string        `yaml:"sql_type"`     // SQLtype - type of gorm SQL (default - "sqlite3")
+	SQLfilename        string        `yaml:"sql_filename"` // SQLfilename - filename of sqlite db (default "app.db")
+	SQLhost            string        `yaml:"sql_host"`     // SQLhost - host of remote or local db (defatult - "127.0.0.1")
+	SQLport            string        `yaml:"sql_port"`     // SQLport - port of remote or local db (default - "5432")
+	SQLdbname          string        `yaml:"sql_dbname"`   // SQLdbname - database name of remote or local db (default - "app")
+	SQLuser            string        `yaml:"sql_user"`     // SQLuser - database username (default - "admin")
+	SQLpassword        string        `yaml:"sql_password"` // SQLpassword - database password (default - "admin")
+	SQLsslmode         string        `yaml:"sql_sslmode"`  // SQLsslmode - database sslmode (default - "disabled")
 }{
 	":7777",
 	CurrentFolder(),
 	"",
+	1000,
+	"http://localhost:7777",
+	"http://localhost:9222",
 	"sqlite3",
 	"app.db",
 	"127.0.0.1",
