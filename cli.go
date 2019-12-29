@@ -61,7 +61,7 @@ func СheckArguments(port *string) {
 
 			color.New(color.FgGreen).Println("---------")
 			color.New(color.FgYellow).Print("-key")
-			fmt.Print(" - secret key wich will be used to generate tokens. Default is")
+			fmt.Print(" - secret key which will be used to generate tokens. Default is")
 			color.New(color.FgYellow).Print(" 1234")
 			fmt.Print(".")
 			color.New(color.FgRed).Print(" Please, change it.\n")
