@@ -75,7 +75,9 @@ func RequestBodyToByte(next http.Handler) http.Handler {
 			http.Error(w, http.StatusText(405), 405)
 			return
 		}
-		ctx := context.WithValue(r.Context(), "body", body)
+		var key interface{}
+		key = "body"
+		ctx := context.WithValue(r.Context(), key, body)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
