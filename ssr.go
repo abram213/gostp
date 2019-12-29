@@ -42,7 +42,6 @@ func SSR(w http.ResponseWriter, r *http.Request) {
 
 func generatePage(pageURL string) string {
 	deleteExpiredPages() //before render new page - delete all expired
-	var renderedHTML string
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
@@ -86,10 +85,8 @@ func generatePage(pageURL string) string {
 		NodeID: &doc.Root.NodeID,
 	})
 
-	renderedHTML = result.OuterHTML
-
-	CachedPages[pageURL] = CachedPage{HTML: renderedHTML, ExpirationTime: time.Now().Local().Add(time.Second * time.Duration(Settings.SSRexpiration))}
-	return renderedHTML
+	CachedPages[pageURL] = CachedPage{HTML: result.OuterHTML, ExpirationTime: time.Now().Local().Add(time.Second * time.Duration(Settings.SSRexpiration))}
+	return result.OuterHTML
 }
 
 func deleteExpiredPages() {
