@@ -38,21 +38,27 @@ type RegexAndDescription struct {
 
 // Settings - structure for gostp settings
 var Settings = struct {
-	Port               string `yaml:"port"`
-	WorkDir            string `yaml:"work_dir"`       // WorkDir - is a directory address where program has been launched (default - directory where program stored)
-	SigningKey         string `yaml:"signing_key"`    // SigningKey - key for signing JWT (default - "")
-	SSRMillisecondWait int64  `yaml:"ssr_wait"`       // Time to wait after page loaded in ms (default - 1000 ms)
-	SSRexpiration      int64  `yaml:"ssr_expiration"` // Time after page will be deleted from cache in s (default - 86400 s)
-	SSRhost            string `yaml:"ssr_host"`       // Host for headless chrome rendering (default - "http://localhost:7777")
-	SSRdevtools        string `yaml:"ssr_devtools"`   // Headless Chrome Devtools address (default - "http://localhost:9222")
-	SQLtype            string `yaml:"sql_type"`       // SQLtype - type of gorm SQL (default - "sqlite3")
-	SQLfilename        string `yaml:"sql_filename"`   // SQLfilename - filename of sqlite db (default "app.db")
-	SQLhost            string `yaml:"sql_host"`       // SQLhost - host of remote or local db (defatult - "127.0.0.1")
-	SQLport            string `yaml:"sql_port"`       // SQLport - port of remote or local db (default - "5432")
-	SQLdbname          string `yaml:"sql_dbname"`     // SQLdbname - database name of remote or local db (default - "app")
-	SQLuser            string `yaml:"sql_user"`       // SQLuser - database username (default - "admin")
-	SQLpassword        string `yaml:"sql_password"`   // SQLpassword - database password (default - "admin")
-	SQLsslmode         string `yaml:"sql_sslmode"`    // SQLsslmode - database sslmode (default - "disabled")
+	Port                          string `yaml:"port"`
+	WorkDir                       string `yaml:"work_dir"`       // WorkDir - is a directory address where program has been launched (default - directory where program stored)
+	SigningKey                    string `yaml:"signing_key"`    // SigningKey - key for signing JWT (default - "")
+	SSRMillisecondWait            int64  `yaml:"ssr_wait"`       // Time to wait after page loaded in ms (default - 1000 ms)
+	SSRexpiration                 int64  `yaml:"ssr_expiration"` // Time after page will be deleted from cache in s (default - 86400 s)
+	SSRhost                       string `yaml:"ssr_host"`       // Host for headless chrome rendering (default - "http://localhost:7777")
+	SSRdevtools                   string `yaml:"ssr_devtools"`   // Headless Chrome Devtools address (default - "http://localhost:9222")
+	SQLtype                       string `yaml:"sql_type"`       // SQLtype - type of gorm SQL (default - "sqlite3")
+	SQLfilename                   string `yaml:"sql_filename"`   // SQLfilename - filename of sqlite db (default "app.db")
+	SQLhost                       string `yaml:"sql_host"`       // SQLhost - host of remote or local db (defatult - "127.0.0.1")
+	SQLport                       string `yaml:"sql_port"`       // SQLport - port of remote or local db (default - "5432")
+	SQLdbname                     string `yaml:"sql_dbname"`     // SQLdbname - database name of remote or local db (default - "app")
+	SQLuser                       string `yaml:"sql_user"`       // SQLuser - database username (default - "admin")
+	SQLpassword                   string `yaml:"sql_password"`   // SQLpassword - database password (default - "admin")
+	SQLsslmode                    string `yaml:"sql_sslmode"`    // SQLsslmode - database sslmode (default - "disabled")
+	ServerName                    string `yaml:"server_name"`
+	ContentType                   string `yaml:"content_type"`
+	AccessControlAllowOrigin      string `yaml:"access_control_allow_origin"`
+	AccessControlAllowMethods     string `yaml:"access_control_allow_methods"`
+	AccessControlAllowHeaders     string `yaml:"access_control_allow_headers"`
+	AccessControlAllowCredentials string `yaml:"access_control_allow_credentials"`
 }{
 	":7777",
 	CurrentFolder(),
@@ -68,7 +74,13 @@ var Settings = struct {
 	"app",
 	"admin",
 	"admin",
-	"disable"}
+	"disable",
+	"Gostp",
+	"application/json",
+	"*",
+	"GET,PUT,POST,DELETE,OPTIONS",
+	"Accept, Accept-Language, Content-Language, Content-Type, x-xsrf-token, authorization",
+	"true"}
 
 // Init - initialize of gostp
 func Init(AppRoutes func(r *chi.Mux), functionsMap map[string]interface{}, regexMap map[string]RegexAndDescription, models ...interface{}) {

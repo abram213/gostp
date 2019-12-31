@@ -16,6 +16,7 @@ type AppError struct {
 }
 
 func (ah ErrorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	Header(w)
 	if err := ah(w, r); err != nil {
 		log.Printf("Error - %v | %v %v%v from %v | %v", err.Message, r.Method, r.Host, r.URL.String(), r.RemoteAddr, err.Code)
 		http.Error(w, err.Message, err.Code)

@@ -12,7 +12,6 @@ import (
 
 // Login handles login attempts
 func Login(w http.ResponseWriter, r *http.Request) *AppError {
-	OkHeader(w)
 	var user User
 
 	data, ok := r.Context().Value("body").([]byte)
@@ -24,7 +23,7 @@ func Login(w http.ResponseWriter, r *http.Request) *AppError {
 	password := gjson.Get(string(data), "password").Str
 
 	if Db.Where("email = ?", email).First(&user).RecordNotFound() {
-		return &AppError{Err, errors.New(`{"error": "Wrong email or password"}`).Error(), 405}
+		return &AppError{Err, errors.New(`{"error": "Wrong email or password"}`).Error(), 401}
 	}
 	if CheckPasswordHash(password, user.Password) {
 		var userTokens UserTokens
@@ -32,12 +31,11 @@ func Login(w http.ResponseWriter, r *http.Request) *AppError {
 		json.NewEncoder(w).Encode(userTokens)
 		return nil
 	}
-	return &AppError{Err, errors.New(`{"error": "Wrong email or password"}`).Error(), 405}
+	return &AppError{Err, errors.New(`{"error": "Wrong email or password"}`).Error(), 401}
 }
 
 // RefreshTokens handles refresh token attempt
 func RefreshTokens(w http.ResponseWriter, r *http.Request) *AppError {
-	OkHeader(w)
 	data, ok := r.Context().Value("body").([]byte)
 	if !ok {
 		return &AppError{Err, Err.Error(), 401}

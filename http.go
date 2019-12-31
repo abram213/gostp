@@ -33,11 +33,11 @@ func FileServer(r chi.Router, path string, root http.FileSystem) {
 	path += "*"
 
 	r.Get(path, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Server", "Gostp")
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Accept, Accept-Language, Content-Language, Content-Type, x-xsrf-token, authorization")
-		w.Header().Set("Access-Control-Allow-Credentials", "true")
+		w.Header().Set("Server", Settings.ServerName)
+		w.Header().Set("Access-Control-Allow-Origin", Settings.AccessControlAllowOrigin)
+		w.Header().Set("Access-Control-Allow-Methods", Settings.AccessControlAllowMethods)
+		w.Header().Set("Access-Control-Allow-Headers", Settings.AccessControlAllowHeaders)
+		w.Header().Set("Access-Control-Allow-Credentials", Settings.AccessControlAllowCredentials)
 		if _, err := os.Stat(fmt.Sprintf("%s", root) + r.RequestURI); os.IsNotExist(err) {
 			http.ServeFile(w, r, filepath.Join(Settings.WorkDir, "dist/index.html"))
 		} else {
@@ -46,24 +46,19 @@ func FileServer(r chi.Router, path string, root http.FileSystem) {
 	}))
 }
 
-// OkHeader sets header to all of handlers
-func OkHeader(w http.ResponseWriter) {
-	w.Header().Set("Server", "Gostp")
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers", "Accept, Accept-Language, Content-Language, Content-Type, x-xsrf-token, authorization")
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
+// Header sets header to all of handlers
+func Header(w http.ResponseWriter) {
+	w.Header().Set("Server", Settings.ServerName)
+	w.Header().Set("Content-Type", Settings.ContentType)
+	w.Header().Set("Access-Control-Allow-Origin", Settings.AccessControlAllowOrigin)
+	w.Header().Set("Access-Control-Allow-Methods", Settings.AccessControlAllowMethods)
+	w.Header().Set("Access-Control-Allow-Headers", Settings.AccessControlAllowHeaders)
+	w.Header().Set("Access-Control-Allow-Credentials", Settings.AccessControlAllowCredentials)
 }
 
 // SendOptions to client
 func SendOptions(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Server", "Gostp")
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers", "Accept, Accept-Language, Content-Language, Content-Type, x-xsrf-token, authorization")
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
+	Header(w)
 	w.WriteHeader(200)
 }
 
