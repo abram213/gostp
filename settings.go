@@ -59,6 +59,8 @@ var Settings = struct {
 	AccessControlAllowMethods     string `yaml:"access_control_allow_methods"`
 	AccessControlAllowHeaders     string `yaml:"access_control_allow_headers"`
 	AccessControlAllowCredentials string `yaml:"access_control_allow_credentials"`
+	JWTaccessExpiration           int64  `yaml:"jwt_access_expiration"`
+	JWTrefreshExpiration          int64  `yaml:"jwt_refresh_expiration"`
 }{
 	":7777",
 	CurrentFolder(),
@@ -80,7 +82,9 @@ var Settings = struct {
 	"*",
 	"GET,PUT,POST,DELETE,OPTIONS",
 	"Accept, Accept-Language, Content-Language, Content-Type, x-xsrf-token, authorization",
-	"true"}
+	"true",
+	10080,
+	43800}
 
 // Init - initialize of gostp
 func Init(AppRoutes func(r *chi.Mux), functionsMap map[string]interface{}, regexMap map[string]RegexAndDescription, models ...interface{}) {
