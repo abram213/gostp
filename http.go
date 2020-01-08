@@ -2,17 +2,13 @@ package gostp
 
 import (
 	"context"
-	"crypto/sha1"
-	"encoding/hex"
 	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/go-chi/chi"
 )
@@ -84,29 +80,4 @@ func GetBodyFromContext(r *http.Request) ([]byte, error) {
 		return []byte(""), errors.New("No body in context")
 	}
 	return data, nil
-}
-
-// GetImageFromRequest saves image to images folder
-func GetImageFromRequest(r *http.Request, formName string) (string, error) {
-	file, header, err := r.FormFile(formName)
-	if err != nil {
-		fmt.Println(err)
-		return "", err
-	}
-	defer file.Close()
-
-	//Generate sha1
-	h := sha1.New()
-	h.Write([]byte(header.Filename + time.Now().String()))
-	serverFileNameHash := hex.EncodeToString(h.Sum(nil))
-	fileName := serverFileNameHash + filepath.Ext(header.Filename)
-
-	f, err := os.OpenFile(filepath.Join(Settings.WorkDir, "dist/images/"+fileName), os.O_WRONLY|os.O_CREATE, 0777)
-	if err != nil {
-		return "", err
-	}
-	defer f.Close()
-	io.Copy(f, file)
-
-	return fileName, nil
 }

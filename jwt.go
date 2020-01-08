@@ -14,6 +14,7 @@ type JWT struct {
 	*jwt.Token
 }
 
+// JWTMiddleware struct
 type JWTMiddleware struct {
 	Options jwtmiddleware.Options
 }
@@ -105,7 +106,6 @@ func GenerateToken(userID uint, expiresIn int64) string {
 
 	claims["user_id"] = userID
 	claims["expires_in"] = expiresIn
-	fmt.Println("generated expiresIn:", expiresIn)
 	token.Claims = claims
 
 	tokenString, _ := token.SignedString([]byte(Settings.SigningKey))
