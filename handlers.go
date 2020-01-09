@@ -19,11 +19,11 @@ func Login(w http.ResponseWriter, r *http.Request) *AppError {
 		return &AppError{Err, Err.Error(), 405}
 	}
 
-	email := gjson.Get(string(data), "email").Str
+	username := gjson.Get(string(data), "username").Str
 	password := gjson.Get(string(data), "password").Str
 
-	if Db.Where("email = ?", email).First(&user).RecordNotFound() {
-		return &AppError{Err, errors.New(`{"error": "Wrong email or password"}`).Error(), 401}
+	if Db.Where("username = ?", username).First(&user).RecordNotFound() {
+		return &AppError{Err, errors.New(`{"error": "wrong username or password"}`).Error(), 401}
 	}
 	if CheckPasswordHash(password, user.Password) {
 		var userTokens UserTokens
@@ -31,7 +31,7 @@ func Login(w http.ResponseWriter, r *http.Request) *AppError {
 		json.NewEncoder(w).Encode(userTokens)
 		return nil
 	}
-	return &AppError{Err, errors.New(`{"error": "Wrong email or password"}`).Error(), 401}
+	return &AppError{Err, errors.New(`{"error": "Wrong username or password"}`).Error(), 401}
 }
 
 // RefreshTokens handles refresh token attempt
@@ -70,8 +70,8 @@ func RefreshTokens(w http.ResponseWriter, r *http.Request) *AppError {
 func GenerateUser() {
 	var qs = []*survey.Question{
 		{
-			Name:     "email",
-			Prompt:   &survey.Input{Message: "Enter email:"},
+			Name:     "username",
+			Prompt:   &survey.Input{Message: "Enter username:"},
 			Validate: survey.Required,
 		},
 		{
@@ -89,7 +89,7 @@ func GenerateUser() {
 	}
 	// the answers will be written to this struct
 	answers := struct {
-		Email    string
+		Username string
 		Password string
 		Role     string
 	}{}
@@ -102,13 +102,13 @@ func GenerateUser() {
 	}
 
 	var user User
-	user.Email = answers.Email
+	user.Username = answers.Username
 	hashingError := ""
 	HashPassword(&answers.Password, &hashingError)
 	if hashingError == "" {
 		user.Password = answers.Password
 		Db.Create(&user)
-		fmt.Printf("User with email: %s created with role: %s.\n", answers.Email, answers.Role)
+		fmt.Printf("User with username: %s created with role: %s.\n", answers.Username, answers.Role)
 	} else {
 		fmt.Println("Hashing error:", hashingError)
 	}

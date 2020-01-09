@@ -14,7 +14,7 @@ type Common struct {
 type User struct {
 	Common
 	Name     string `json:"name"`
-	Email    string `json:"email" gorm:"type:varchar(100);unique_index" security:"create_only" regex:"email"`
+	Username string `json:"username" gorm:"type:varchar(100);unique_index" security:"create_only" regex:"username"`
 	Password string `json:"password" security:"hidden_out" regex:"password" function:"hashpwd"`
 	Token    Token  `json:"token" security:"protected"`
 }

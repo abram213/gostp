@@ -25,10 +25,14 @@ var Db *gorm.DB
 var Err error
 
 // FunctionsMap - map of functions
-var FunctionsMap = make(map[string]interface{})
+var FunctionsMap = map[string]interface{}{
+	"hashpwd": HashPassword,
+}
 
 // RegexMap - map of regexes
-var RegexMap = make(map[string]RegexAndDescription)
+var RegexMap = map[string]RegexAndDescription{
+	"username": RegexAndDescription{Regex: "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$", Description: "email isn't valid"},
+	"password": RegexAndDescription{Regex: `^.{6,}$`, Description: "password is less than 6 symbols"}}
 
 // RegexAndDescription struct which contains regexes and description of error
 type RegexAndDescription struct {
@@ -90,9 +94,13 @@ var Settings = struct {
 func Init(AppRoutes func(r *chi.Mux), functionsMap map[string]interface{}, regexMap map[string]RegexAndDescription, models ...interface{}) {
 	r := chi.NewRouter()
 	// Functions Map initialization
-	FunctionsMap = functionsMap
+	for k, v := range functionsMap {
+		FunctionsMap[k] = v
+	}
 	// Regex Map initialization
-	RegexMap = regexMap
+	for k, v := range regexMap {
+		RegexMap[k] = v
+	}
 	// Models initialization
 	Models = models
 
