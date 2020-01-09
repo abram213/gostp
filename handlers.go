@@ -26,12 +26,10 @@ func Login(w http.ResponseWriter, r *http.Request) *AppError {
 		return &AppError{Err, errors.New(`{"error": "wrong username or password"}`).Error(), 401}
 	}
 	if CheckPasswordHash(password, user.Password) {
-		var userTokens UserTokens
-		RefreshUserTokens(user, &userTokens)
-		json.NewEncoder(w).Encode(userTokens)
+		json.NewEncoder(w).Encode(RefreshUserTokens(user.ID))
 		return nil
 	}
-	return &AppError{Err, errors.New(`{"error": "Wrong username or password"}`).Error(), 401}
+	return &AppError{Err, errors.New(`{"error": "wrong username or password"}`).Error(), 401}
 }
 
 // RefreshTokens handles refresh token attempt
@@ -51,18 +49,12 @@ func RefreshTokens(w http.ResponseWriter, r *http.Request) *AppError {
 	if err != nil {
 		return &AppError{err, err.Error(), 401}
 	}
-	var user User
-	if Db.Preload("Token").Where("id = ?", userID).First(&user).RecordNotFound() {
-		return &AppError{err, errors.New(`{"error": "No such user"}`).Error(), 401}
-	}
 
 	if token.IsExpired() {
 		return &AppError{err, err.Error(), 401}
 	}
 
-	var userTokens UserTokens
-	RefreshUserTokens(user, &userTokens)
-	json.NewEncoder(w).Encode(userTokens)
+	json.NewEncoder(w).Encode(RefreshUserTokens(uint(userID)))
 	return nil
 }
 

@@ -114,18 +114,17 @@ func GenerateToken(userID uint, expiresIn int64) string {
 }
 
 // RefreshUserTokens - refreshes user tokens
-func RefreshUserTokens(user User, userTokens *UserTokens) {
+func RefreshUserTokens(userID uint) UserTokens {
 	accessExpiresIn := time.Now().Add(time.Minute * time.Duration(Settings.JWTaccessExpiration)).Unix()
 	refreshExpiresIn := time.Now().Add(time.Minute * time.Duration(Settings.JWTrefreshExpiration)).Unix()
-	accessToken := GenerateToken(user.ID, accessExpiresIn)
-	refreshToken := GenerateToken(user.ID, refreshExpiresIn)
+	accessToken := GenerateToken(userID, accessExpiresIn)
+	refreshToken := GenerateToken(userID, refreshExpiresIn)
 
-	user.Token.RefreshToken = refreshToken
-	Db.Save(&user)
-
+	var userTokens UserTokens
 	userTokens.AccessToken = accessToken
 	userTokens.RefreshToken = refreshToken
 	userTokens.AccessExpiresIn = accessExpiresIn
+	return userTokens
 }
 
 // GetUserIDClaim returns UserId
