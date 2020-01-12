@@ -137,8 +137,8 @@ func GetUserIDClaim(tokenString string) (float64, error) {
 	})
 
 	if err != nil {
-		fmt.Printf("token parce problem - %v", err)
-		return 0, fmt.Errorf("token parce problem: %v", err)
+		fmt.Printf("token parse problem - %v", err)
+		return 0, fmt.Errorf("token parse problem: %v", err)
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)

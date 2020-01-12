@@ -68,7 +68,7 @@ var Settings = struct {
 }{
 	":7777",
 	CurrentFolder(),
-	"",
+	"1234",
 	1000,
 	86400,
 	"http://localhost:7777",

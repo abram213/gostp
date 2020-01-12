@@ -9,17 +9,26 @@ import (
 )
 
 // CheckAccess gets user by him token and checks accesses by struct fieldnames
-func CheckAccess(r *http.Request, accesses []string, accessStruct interface{}) bool {
-	token, _ := jwtmiddleware.FromAuthHeader(r)
-	userID, _ := GetUserIDClaim(token)
+func CheckAccess(r *http.Request, accesses []string, accessStruct interface{}, isAdmin *bool) bool {
+	token, errTokenGet := jwtmiddleware.FromAuthHeader(r)
+	if errTokenGet != nil {
+		return false
+	}
+	userID, errUserGet := GetUserIDClaim(token)
+	if errUserGet != nil {
+		return false
+	}
 	typeOfAccessStruct := reflect.TypeOf(accessStruct)
 	newInterfaceOfAccessStruct := reflect.New(typeOfAccessStruct).Interface()
 	if Db.Where("user_id = ?", userID).First(newInterfaceOfAccessStruct).RecordNotFound() {
 		return false
 	}
 	accessStructValue := reflect.ValueOf(newInterfaceOfAccessStruct).Elem()
-	// If user has Admin access - it function returns true all the time
+	// If user has Admin access - this function returns true all the time
 	if accessStructValue.FieldByName("Admin").Bool() {
+		if isAdmin != nil {
+			*isAdmin = true
+		}
 		return true
 	}
 	for _, access := range accesses {
@@ -31,7 +40,10 @@ func CheckAccess(r *http.Request, accesses []string, accessStruct interface{}) b
 }
 
 // CheckBelonging checks if user's some struct belogns to another through several structs.
-func CheckBelonging(r *http.Request, target string, path []string, models ...interface{}) bool {
+func CheckBelonging(r *http.Request, target string, isAdmin bool, path []string, models ...interface{}) bool {
+	if isAdmin {
+		return true
+	}
 	targetID, err := strconv.ParseUint(target, 10, 64)
 	if err == nil {
 		for index, model := range models {
@@ -46,8 +58,14 @@ func CheckBelonging(r *http.Request, target string, path []string, models ...int
 				targetID = reflect.ValueOf(newInterfaceOfModel).Elem().FieldByName("UserID").Uint()
 			}
 		}
-		token, _ := jwtmiddleware.FromAuthHeader(r)
-		userID, _ := GetUserIDClaim(token)
+		token, errTokenGet := jwtmiddleware.FromAuthHeader(r)
+		if errTokenGet != nil {
+			return false
+		}
+		userID, errUserGet := GetUserIDClaim(token)
+		if errUserGet != nil {
+			return false
+		}
 		currentUserID := uint64(userID)
 		if currentUserID == targetID {
 			return true

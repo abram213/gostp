@@ -64,7 +64,7 @@ func СheckArguments(port *string) {
 			fmt.Print(" - secret key which will be used to generate tokens. Default is")
 			color.New(color.FgYellow).Print(" 1234")
 			fmt.Print(".")
-			color.New(color.FgRed).Print(" Please, change it.\n")
+			color.New(color.FgRed).Print(" Please, change it by argument or in yaml file.\n")
 			fmt.Println("")
 			os.Exit(0)
 		}
