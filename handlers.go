@@ -100,6 +100,17 @@ func GenerateUser() {
 	if hashingError == "" {
 		user.Password = answers.Password
 		Db.Create(&user)
+
+		var access Access
+		access.UserID = user.ID
+		switch answers.Role {
+		case "admin":
+			access.Admin = true
+		case "user":
+			access.User = true
+		}
+		Db.Create(&access)
+
 		fmt.Printf("User with username: %s created with role: %s.\n", answers.Username, answers.Role)
 	} else {
 		fmt.Println("Hashing error:", hashingError)
