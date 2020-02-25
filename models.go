@@ -13,7 +13,6 @@ type Common struct {
 // User contains minimal information about user
 type User struct {
 	Common
-	Name     string `json:"name"`
 	Username string `json:"username" gorm:"type:varchar(100);unique_index" security:"create_only" regex:"username"`
 	Password string `json:"password" security:"hidden_out" regex:"password" function:"hashpwd"`
 }
