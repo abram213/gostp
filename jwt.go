@@ -31,24 +31,37 @@ var JwtMiddleware = jwtmiddleware.New(jwtmiddleware.Options{
 // JWTHandler gets http request, checks jwt token (if it's correct and not expired)
 func JWTHandler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Let secure process the request. If it returns an error,
-		// that indicates the request should not continue.
-		err := JwtMiddleware.CheckJWT(w, r)
+		//Check, if OPTIONS - ServeHTTP and return
+		if r.Method == "OPTIONS" {
+			h.ServeHTTP(w, r)
+		} else {
+			// Let secure process the request. If it returns an error,
+			// that indicates the request should not continue.
+			err := JwtMiddleware.CheckJWT(w, r)
 
-		// If there was an error, do not continue.
-		if err != nil {
-			fmt.Println("wow, error")
-			return
-		}
+			// If there was an error, do not continue.
+			if err != nil {
+				fmt.Printf("check jwt problem: %v", err)
+				return
+			}
 
-		rawToken, err := JwtMiddleware.Options.Extractor(r)
-		token, err := JWTParse(rawToken)
-		if token.IsExpired() {
-			Header(w)
-			http.Error(w, `{"error":"token expired"}`, 401)
-			return
+			rawToken, err := JwtMiddleware.Options.Extractor(r)
+			if err != nil {
+				fmt.Printf("token extract problem: %v", err)
+				return
+			}
+			token, err := JWTParse(rawToken)
+			if err != nil {
+				fmt.Printf("token parse problem: %v", err)
+				return
+			}
+			if token.IsExpired() {
+				Header(w)
+				http.Error(w, `{"error":"token expired"}`, 401)
+				return
+			}
+			h.ServeHTTP(w, r)
 		}
-		h.ServeHTTP(w, r)
 	})
 }
 
