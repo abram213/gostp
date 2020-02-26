@@ -41,56 +41,63 @@ func checkSecurity(tagsString string, handlerType, direction string, godMode boo
 func deepInspection(model interface{}, parendJSON string, deletions *[]string, regexTagsMap, functionsTagsMap map[string]string, handlerType, direction string, godMode bool) {
 	values := reflect.ValueOf(model)
 	fields := reflect.TypeOf(model)
-	num := fields.NumField()
-
-	for i := 0; i < num; i++ {
-		field := fields.Field(i)
-		tags, _ := structtag.Parse(string(field.Tag))
-		jsonTag, _ := tags.Get("json")
-		securityTag, _ := tags.Get("security")
-		regexTag, _ := tags.Get("regex")
-		functionTag, _ := tags.Get("function")
-		valueValue := values.Field(i).Kind()
-		var childJSON string
-		if jsonTag != nil {
-			childJSON = "." + jsonTag.Name
-		} else {
-			childJSON = ""
+	fieldType := fields.Kind()
+	if fieldType == reflect.Slice || fieldType == reflect.Array {
+		s := reflect.ValueOf(model)
+		for i := 0; i < s.Len(); i++ {
+			deepInspection(s.Index(i).Interface(), parendJSON, deletions, regexTagsMap, functionsTagsMap, handlerType, direction, godMode)
 		}
-
-		if valueValue == reflect.Struct && securityTag == nil {
-			deepInspection(values.Field(i).Interface(), parendJSON+childJSON, deletions, regexTagsMap, functionsTagsMap, handlerType, direction, godMode)
-
-		} else if valueValue == reflect.Struct && securityTag != nil {
-			deleted := checkSecurity(securityTag.Name, handlerType, direction, godMode)
-			if !deleted {
-				deepInspection(values.Field(i).Interface(), parendJSON+childJSON, deletions, regexTagsMap, functionsTagsMap, handlerType, direction, godMode)
+	} else {
+		num := fields.NumField()
+		for i := 0; i < num; i++ {
+			field := fields.Field(i)
+			tags, _ := structtag.Parse(string(field.Tag))
+			jsonTag, _ := tags.Get("json")
+			securityTag, _ := tags.Get("security")
+			regexTag, _ := tags.Get("regex")
+			functionTag, _ := tags.Get("function")
+			valueValue := values.Field(i).Kind()
+			var childJSON string
+			if jsonTag != nil {
+				childJSON = "." + jsonTag.Name
 			} else {
-				path := parendJSON + childJSON
-				*deletions = append(*deletions, path[1:len(path)])
+				childJSON = ""
 			}
-		} else {
-			if jsonTag != nil && jsonTag.Name != "-" {
-				if securityTag != nil {
-					deleted := checkSecurity(securityTag.Name, handlerType, direction, godMode)
-					if deleted {
+
+			if valueValue == reflect.Struct && securityTag == nil {
+				deepInspection(values.Field(i).Interface(), parendJSON+childJSON, deletions, regexTagsMap, functionsTagsMap, handlerType, direction, godMode)
+
+			} else if valueValue == reflect.Struct && securityTag != nil {
+				deleted := checkSecurity(securityTag.Name, handlerType, direction, godMode)
+				if !deleted {
+					deepInspection(values.Field(i).Interface(), parendJSON+childJSON, deletions, regexTagsMap, functionsTagsMap, handlerType, direction, godMode)
+				} else {
+					path := parendJSON + childJSON
+					*deletions = append(*deletions, path[1:len(path)])
+				}
+			} else {
+				if jsonTag != nil && jsonTag.Name != "-" {
+					if securityTag != nil {
+						deleted := checkSecurity(securityTag.Name, handlerType, direction, godMode)
+						if deleted {
+							path := parendJSON + childJSON
+							*deletions = append(*deletions, path[1:len(path)])
+						}
+					}
+
+					if regexTag != nil {
 						path := parendJSON + childJSON
-						*deletions = append(*deletions, path[1:len(path)])
+						regexTagsMap[path[1:len(path)]] = regexTag.Name
+					}
+
+					if functionTag != nil {
+						path := parendJSON + childJSON
+						functionsTagsMap[path[1:len(path)]] = functionTag.Name
 					}
 				}
-
-				if regexTag != nil {
-					path := parendJSON + childJSON
-					regexTagsMap[path[1:len(path)]] = regexTag.Name
-				}
-
-				if functionTag != nil {
-					path := parendJSON + childJSON
-					functionsTagsMap[path[1:len(path)]] = functionTag.Name
-				}
 			}
-		}
 
+		}
 	}
 }
 
