@@ -52,11 +52,7 @@ func CheckBelonging(r *http.Request, target string, isAdmin bool, path []string,
 			if Db.Where("id = ?", targetID).First(newInterfaceOfModel).RecordNotFound() {
 				return false
 			}
-			if index+1 != len(models) {
-				targetID = reflect.ValueOf(newInterfaceOfModel).Elem().FieldByName(path[index]).Uint()
-			} else {
-				targetID = reflect.ValueOf(newInterfaceOfModel).Elem().FieldByName("UserID").Uint()
-			}
+			targetID = reflect.ValueOf(newInterfaceOfModel).Elem().FieldByName(path[index]).Uint()
 		}
 		token, errTokenGet := jwtmiddleware.FromAuthHeader(r)
 		if errTokenGet != nil {
