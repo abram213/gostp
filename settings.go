@@ -65,6 +65,8 @@ var Settings = struct {
 	AccessControlAllowCredentials string `yaml:"access_control_allow_credentials"`
 	JWTaccessExpiration           int64  `yaml:"jwt_access_expiration"`
 	JWTrefreshExpiration          int64  `yaml:"jwt_refresh_expiration"`
+	VAPIDPublicKey                string `yaml:"vapid_public_key"`  // you can generate GenerateVAPIDKeys
+	VAPIDPrivateKey               string `yaml:"vapid_private_key"` // by webpush.GenerateVAPIDKeys()
 }{
 	":7777",
 	CurrentFolder(),
@@ -88,7 +90,9 @@ var Settings = struct {
 	"Accept, Accept-Language, Content-Language, Content-Type, x-xsrf-token, authorization",
 	"true",
 	10080,
-	43800}
+	43800,
+	"BLyVkijm-gZ4C3NGk7VzM1_cEr8Jek94KvkyFicTsiUwmkWwxHWytNs0kUC3u8y05OTYDLvzOi3o07_7czkEmYw", // change it in production
+	"2dY6qzlzIF3rmye94U49WNvoEWYfit6jr2-2U_jekXg"}                                             // you can generate GenerateVAPIDKeys by webpush.GenerateVAPIDKeys()
 
 // Init - initialize of gostp
 func Init(AppRoutes func(r *chi.Mux), functionsMap map[string]interface{}, regexMap map[string]RegexAndDescription, models ...interface{}) {
@@ -119,10 +123,15 @@ func Init(AppRoutes func(r *chi.Mux), functionsMap map[string]interface{}, regex
 	}
 	// Check arguments from command line
 	СheckArguments(&Settings.Port)
+
+	// Start serving service-worker.js and manifest.json for pwa
+	http.HandleFunc("/service-worker.js", sendSW)
+	http.HandleFunc("/manifest.json", sendManifest)
 	// Start static file server
 	filesDir := filepath.Join(Settings.WorkDir, "dist")
 	FileServer(r, "/", http.Dir(filesDir))
 	// Start all app routes
+
 	AppRoutes(r)
 	// Start http listener
 	http.ListenAndServe(Settings.Port, r)
