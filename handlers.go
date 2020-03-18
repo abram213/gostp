@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"path/filepath"
 
 	"github.com/AlecAivazis/survey"
 	"github.com/tidwall/gjson"
@@ -115,4 +117,24 @@ func GenerateUser() {
 	} else {
 		fmt.Println("Hashing error:", hashingError)
 	}
+}
+
+func sendSW(w http.ResponseWriter, r *http.Request) {
+	data, err := ioutil.ReadFile(filepath.Join(Settings.WorkDir, "dist/service-worker.js"))
+	if err != nil {
+		http.Error(w, "Couldn't read file", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/javascript; charset=utf-8")
+	w.Write(data)
+}
+
+func sendManifest(w http.ResponseWriter, r *http.Request) {
+	data, err := ioutil.ReadFile(filepath.Join(Settings.WorkDir, "dist/manifest.json"))
+	if err != nil {
+		http.Error(w, "Couldn't read file", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Write(data)
 }
